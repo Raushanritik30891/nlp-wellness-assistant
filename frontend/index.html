@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NLP Wellness Assistant — Gita & Puranas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design Tokens ─────────────────────────────── */
+    :root {
+      --saffron:       #E8854A;
+      --saffron-light: #F5C499;
+      --saffron-glow:  rgba(232,133,74,0.15);
+      --ink:           #1C1410;
+      --ink-mid:       #4A3728;
+      --ink-faint:     #8B6E5A;
+      --parchment:     #FBF5EE;
+      --parchment-2:   #F5EDE1;
+      --white:         #FFFFFF;
+      --lotus-red:     #C0534A;
+      --turquoise:     #3B8C8C;
+      --indigo:        #4A5C9A;
+      --gold:          #C9973A;
+      --success:       #4A8C5C;
+
+      --emotion-stress:     #C0534A;
+      --emotion-anxiety:    #B8762A;
+      --emotion-motivation: #3B8C8C;
+      --emotion-confusion:  #4A5C9A;
+      --emotion-happiness:  #4A8C5C;
+      --emotion-general:    #7A5C4A;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+
+      --shadow-sm: 0 2px 8px rgba(28,20,16,0.08);
+      --shadow-md: 0 6px 24px rgba(28,20,16,0.12);
+      --shadow-lg: 0 16px 48px rgba(28,20,16,0.14);
+
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans:  'Inter', system-ui, sans-serif;
+
+      --transition: 240ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--parchment);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Mandala Background ───────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(232,133,74,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 90% 90%, rgba(59,140,140,0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ───────────────────────────────────── */
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── Header ───────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 44px 0 32px;
+      position: relative;
+    }
+
+    .header-ornament {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+      opacity: 0.75;
+      letter-spacing: 8px;
+    }
+
+    .header-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .header-title span {
+      color: var(--saffron);
+    }
+
+    .header-subtitle {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--ink-faint);
+      margin-bottom: 12px;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--saffron-glow);
+      border: 1px solid rgba(232,133,74,0.25);
+      color: var(--saffron);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .divider-ornament {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0;
+      color: var(--saffron-light);
+      font-size: 18px;
+    }
+    .divider-ornament::before,
+    .divider-ornament::after {
+      content: '';
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--saffron-light));
+    }
+    .divider-ornament::after {
+      background: linear-gradient(90deg, var(--saffron-light), transparent);
+    }
+
+    /* ── Input Area ───────────────────────────────── */
+    .input-section {
+      background: var(--white);
+      border: 1px solid rgba(232,133,74,0.2);
+      border-radius: var(--radius-xl);
+      padding: 28px 28px 20px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 28px;
+    }
+
+    .input-label {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 16px 18px;
+      border: 1.5px solid rgba(232,133,74,0.25);
+      border-radius: var(--radius-md);
+      background: var(--parchment);
+      font-family: var(--font-sans);
+      font-size: 0.96rem;
+      color: var(--ink);
+      resize: vertical;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      line-height: 1.6;
+    }
+    textarea:focus {
+      border-color: var(--saffron);
+      box-shadow: 0 0 0 3px var(--saffron-glow);
+    }
+    textarea::placeholder { color: var(--ink-faint); }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      margin-top: 4px;
+    }
+
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .quick-btn {
+      background: var(--parchment-2);
+      border: 1px solid rgba(232,133,74,0.2);
+      color: var(--ink-mid);
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+    }
+    .quick-btn:hover {
+      background: var(--saffron-glow);
+      border-color: var(--saffron);
+      color: var(--saffron);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--saffron) 0%, #C96A2A 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 16px rgba(232,133,74,0.35);
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(232,133,74,0.45);
+    }
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Spinner ──────────────────────────────────── */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results ──────────────────────────────────── */
+    #results {
+      display: none;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Emotion Card ─────────────────────────────── */
+    .emotion-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 20px;
+      border-left: 5px solid var(--saffron);
+      position: relative;
+      overflow: hidden;
+    }
+    .emotion-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      opacity: 0.06;
+      background: var(--emotion-color, var(--saffron));
+    }
+
+    .emotion-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .emotion-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .emotion-icon {
+      font-size: 2.8rem;
+      line-height: 1;
+    }
+
+    .emotion-label-wrap {}
+    .emotion-detected-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 2px;
+    }
+    .emotion-name {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .confidence-badge {
+      background: var(--parchment-2);
+      border: 1.5px solid rgba(232,133,74,0.25);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      text-align: center;
+    }
+    .confidence-num {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--saffron);
+      line-height: 1;
+    }
+    .confidence-label {
+      font-size: 0.68rem;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    /* Probability bars */
+    .prob-bars {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .prob-item {
+      background: var(--parchment);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 0.78rem;
+    }
+
+    .prob-item-label {
+      color: var(--ink-mid);
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .prob-bar-bg {
+      height: 4px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--saffron);
+      transition: width 0.8s ease;
+    }
+
+    /* ── Wisdom Card ──────────────────────────────── */
+    .wisdom-card {
+      background: linear-gradient(135deg, #2C1A0E 0%, #1A1008 100%);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+      color: var(--parchment);
+      position: relative;
+      overflow: hidden;
+    }
+    .wisdom-card::before {
+      content: '॥';
+      position: absolute;
+      top: 50%;
+      right: -20px;
+      transform: translateY(-50%);
+      font-size: 200px;
+      color: rgba(255,255,255,0.03);
+      font-family: serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .wisdom-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .wisdom-title {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--saffron-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .source-badge {
+      background: rgba(232,133,74,0.15);
+      border: 1px solid rgba(232,133,74,0.3);
+      color: var(--saffron-light);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .sanskrit-text {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.0rem;
+      color: rgba(245,196,153,0.7);
+      line-height: 1.7;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .verse-english {
+      font-family: var(--font-serif);
+      font-size: 1.18rem;
+      line-height: 1.75;
+      color: var(--parchment);
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .verse-meaning {
+      background: rgba(255,255,255,0.05);
+      border-left: 3px solid var(--saffron);
+      padding: 14px 16px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.9rem;
+      color: rgba(251,245,238,0.85);
+      line-height: 1.65;
+    }
+    .verse-meaning-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--saffron-light);
+      margin-bottom: 6px;
+    }
+
+    .relevance-score {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: rgba(245,196,153,0.6);
+    }
+
+    /* ── Related Verses ───────────────────────────── */
+    .related-section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .related-verse-card {
+      background: var(--white);
+      border: 1px solid rgba(232,133,74,0.15);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 12px;
+      transition: all var(--transition);
+    }
+    .related-verse-card:hover {
+      border-color: rgba(232,133,74,0.35);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .related-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .related-source {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--saffron);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .related-relevance {
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      background: var(--parchment-2);
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .related-english {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--ink-mid);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+    .related-meaning {
+      font-size: 0.84rem;
+      color: var(--ink-faint);
+      line-height: 1.55;
+    }
+
+    /* ── Guidance Card ────────────────────────────── */
+    .guidance-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+    }
+
+    .guidance-tip {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      animation: fadeUp 0.4s ease both;
+    }
+    .guidance-tip:last-child { border-bottom: none; }
+    .guidance-tip:nth-child(1) { animation-delay: 0.05s; }
+    .guidance-tip:nth-child(2) { animation-delay: 0.12s; }
+    .guidance-tip:nth-child(3) { animation-delay: 0.19s; }
+
+    .tip-num {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      background: var(--saffron-glow);
+      border: 1.5px solid rgba(232,133,74,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--saffron);
+      margin-top: 1px;
+    }
+
+    .tip-text {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--ink-mid);
+    }
+    .tip-text strong { color: var(--ink); }
+
+    /* ── Visualizations Panel ─────────────────────── */
+    .viz-section {
+      margin-top: 40px;
+    }
+
+    .viz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .viz-card {
+      background: var(--white);
+      border: 1px solid rgba(232,133,74,0.15);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .viz-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .viz-card img {
+      width: 100%;
+      display: block;
+    }
+    .viz-label {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      text-align: center;
+      background: var(--parchment);
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* ── Lightbox ─────────────────────────────────── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lightbox.open {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity var(--transition);
+      background: none;
+      border: none;
+    }
+    .lightbox-close:hover { opacity: 1; }
+
+    /* ── Model Info Footer ────────────────────────── */
+    .model-info-strip {
+      background: var(--parchment-2);
+      border: 1px solid rgba(232,133,74,0.15);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+    .model-stat {
+      text-align: center;
+    }
+    .model-stat-val {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--saffron);
+    }
+    .model-stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      margin-top: 2px;
+    }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+    }
+    footer .om {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 6px;
+      opacity: 0.4;
+    }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 600px) {
+      .emotion-top { flex-direction: column; align-items: flex-start; }
+      .prob-bars { grid-template-columns: repeat(2, 1fr); }
+      .wisdom-header { flex-direction: column; }
+    }
+
+    /* ── Utility ──────────────────────────────────── */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+
+    /* Render markdown-style bold */
+    .render-md b, .render-md strong { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header>
+      <span class="header-ornament">𑁋 ॐ 𑁋</span>
+      <h1 class="header-title">NLP <span>Wellness</span> Assistant</h1>
+      <p class="header-subtitle">Wisdom of the Bhagavad Gita &amp; Puranas for the modern mind</p>
+      <span class="header-tag">🧠 NLP · Emotion AI · Ancient Wisdom</span>
+      <div class="divider-ornament">✦</div>
+    </header>
+
+    <!-- Input -->
+    <section class="input-section">
+      <div class="input-label">
+        <span>💬</span> How are you feeling today?
+      </div>
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          placeholder="Share what's on your mind… e.g., I am feeling very stressed about work and can't seem to relax."
+          maxlength="500"
+          oninput="updateChar()"
+        ></textarea>
+        <div class="char-count"><span id="charCount">0</span>/500</div>
+      </div>
+
+      <div class="quick-prompts" id="quickPrompts">
+        <button class="quick-btn" onclick="setPrompt(this)">😣 I am feeling stressed</button>
+        <button class="quick-btn" onclick="setPrompt(this)">😰 I feel anxious about the future</button>
+        <button class="quick-btn" onclick="setPrompt(this)">💪 I have lost my motivation</button>
+        <button class="quick-btn" onclick="setPrompt(this)">🤔 I am confused about my path</button>
+        <button class="quick-btn" onclick="setPrompt(this)">😊 I am feeling happy today</button>
+        <button class="quick-btn" onclick="setPrompt(this)">🌿 I seek guidance for life</button>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="analyze()">
+        <span id="btnText">✨ Seek Wisdom</span>
+        <span class="spinner" id="spinner"></span>
+      </button>
+    </section>
+
+    <!-- Results -->
+    <div id="results">
+
+      <!-- Emotion Card -->
+      <div class="emotion-card" id="emotionCard">
+        <div class="emotion-top">
+          <div class="emotion-main">
+            <div class="emotion-icon" id="emotionIcon">😊</div>
+            <div class="emotion-label-wrap">
+              <div class="emotion-detected-label">Detected Emotion</div>
+              <div class="emotion-name" id="emotionName">—</div>
+            </div>
+          </div>
+          <div class="confidence-badge">
+            <div class="confidence-num" id="confidenceNum">—</div>
+            <div class="confidence-label">Confidence</div>
+          </div>
+        </div>
+        <div class="prob-bars" id="probBars"></div>
+      </div>
+
+      <!-- Wisdom Card -->
+      <div class="wisdom-card">
+        <div class="wisdom-header">
+          <div class="wisdom-title">📜 Divine Verse</div>
+          <span class="source-badge" id="verseSource">—</span>
+        </div>
+        <div class="sanskrit-text" id="verseSanskrit"></div>
+        <div class="verse-english" id="verseEnglish">&ldquo;…&rdquo;</div>
+        <div class="verse-meaning">
+          <div class="verse-meaning-label">Simplified Meaning</div>
+          <div id="verseMeaning"></div>
+        </div>
+        <div class="relevance-score">
+          ⟡ Relevance: <span id="verseRelevance">—</span>
+        </div>
+      </div>
+
+      <!-- Related Verses -->
+      <div class="related-section">
+        <div class="section-title">📚 Related Teachings</div>
+        <div id="relatedVerses"></div>
+      </div>
+
+      <!-- Wellness Guidance -->
+      <div class="guidance-card">
+        <div class="section-title">🌱 Wellness Guidance</div>
+        <div id="guidanceList"></div>
+      </div>
+
+    </div>
+
+    <!-- Visualizations -->
+    <div class="viz-section">
+      <div class="section-title">📊 Model Analytics</div>
+      <div class="viz-grid">
+        <div class="viz-card" onclick="openLightbox('emotion_distribution')">
+          <img src="http://localhost:5000/plot/emotion_distribution" alt="Emotion Distribution" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">Emotion Distribution</div>
+        </div>
+        <div class="viz-card" onclick="openLightbox('model_comparison')">
+          <img src="http://localhost:5000/plot/model_comparison" alt="Model Comparison" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">LR vs Naive Bayes</div>
+        </div>
+        <div class="viz-card" onclick="openLightbox('word_cloud_viz')">
+          <img src="http://localhost:5000/plot/word_cloud_viz" alt="Word Cloud" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">Top Words</div>
+        </div>
+        <div class="viz-card" onclick="openLightbox('confusion_matrix_nb')">
+          <img src="http://localhost:5000/plot/confusion_matrix_nb" alt="Confusion Matrix" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">Confusion Matrix (Best Model)</div>
+        </div>
+        <div class="viz-card" onclick="openLightbox('word_frequency')">
+          <img src="http://localhost:5000/plot/word_frequency" alt="Word Frequency" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">Word Frequency per Emotion</div>
+        </div>
+        <div class="viz-card" onclick="openLightbox('confusion_matrix_lr')">
+          <img src="http://localhost:5000/plot/confusion_matrix_lr" alt="LR Confusion Matrix" onerror="this.parentElement.style.display='none'" />
+          <div class="viz-label">Confusion Matrix (LR)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Info -->
+    <div class="model-info-strip" id="modelInfoStrip">
+      <div class="model-stat">
+        <div class="model-stat-val" id="statModel">NB</div>
+        <div class="model-stat-label">Best Model</div>
+      </div>
+      <div class="model-stat">
+        <div class="model-stat-val" id="statAcc">—</div>
+        <div class="model-stat-label">Accuracy</div>
+      </div>
+      <div class="model-stat">
+        <div class="model-stat-val" id="statF1">—</div>
+        <div class="model-stat-label">F1 Score</div>
+      </div>
+      <div class="model-stat">
+        <div class="model-stat-val">TF-IDF</div>
+        <div class="model-stat-label">Feature Extraction</div>
+      </div>
+      <div class="model-stat">
+        <div class="model-stat-val">6</div>
+        <div class="model-stat-label">Emotion Classes</div>
+      </div>
+      <div class="model-stat">
+        <div class="model-stat-val">31</div>
+        <div class="model-stat-label">Sacred Verses</div>
+      </div>
+    </div>
+
+    <footer>
+      <span class="om">ॐ</span>
+      Built with NLP · Emotion Classification · Information Retrieval<br/>
+      Bhagavad Gita &amp; Puranas Wisdom Dataset
+    </footer>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="" />
+  </div>
+
+  <script>
+    const API = "http://localhost:5000";
+    const EMOTION_COLORS = {
+      stress:     "#C0534A",
+      anxiety:    "#B8762A",
+      motivation: "#3B8C8C",
+      confusion:  "#4A5C9A",
+      happiness:  "#4A8C5C",
+      general:    "#7A5C4A",
+    };
+
+    // ── Init ────────────────────────────────────────
+    async function loadModelInfo() {
+      try {
+        const r = await fetch(`${API}/model-info`);
+        const d = await r.json();
+        const m = d.metrics;
+        document.getElementById("statModel").textContent =
+          d.model_name.includes("Naive") ? "NB" : "LR";
+        document.getElementById("statAcc").textContent =
+          (m.accuracy * 100).toFixed(1) + "%";
+        document.getElementById("statF1").textContent =
+          (m.f1 * 100).toFixed(1) + "%";
+      } catch {}
+    }
+
+    // ── Helpers ─────────────────────────────────────
+    function updateChar() {
+      const v = document.getElementById("userInput").value;
+      document.getElementById("charCount").textContent = v.length;
+    }
+
+    function setPrompt(btn) {
+      const text = btn.textContent.replace(/^[^\s]+\s/, "");
+      document.getElementById("userInput").value = text;
+      updateChar();
+    }
+
+    function renderMd(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/__(.*?)__/g, "<strong>$1</strong>");
+    }
+
+    // ── Main Analysis ────────────────────────────────
+    async function analyze() {
+      const text = document.getElementById("userInput").value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById("submitBtn");
+      const btnText = document.getElementById("btnText");
+      const spinner = document.getElementById("spinner");
+
+      btn.disabled = true;
+      btnText.textContent = "Seeking wisdom…";
+      spinner.style.display = "block";
+
+      try {
+        const r = await fetch(`${API}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        const d = await r.json();
+        renderResults(d);
+      } catch (e) {
+        alert("⚠️ Could not connect to backend. Make sure Flask is running on port 5000.");
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = "✨ Seek Wisdom";
+        spinner.style.display = "none";
+      }
+    }
+
+    function renderResults(d) {
+      const emotion = d.emotion_raw || "general";
+      const color = EMOTION_COLORS[emotion] || "#888";
+
+      // Show results block
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.style.display = "block";
+      resultsDiv.style.animation = "none";
+      requestAnimationFrame(() => { resultsDiv.style.animation = ""; });
+      resultsDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // Emotion card
+      const card = document.getElementById("emotionCard");
+      card.style.borderLeftColor = color;
+
+      document.getElementById("emotionIcon").textContent = d.emotion_icon || "🌿";
+      document.getElementById("emotionName").textContent = d.emotion || "—";
+      document.getElementById("confidenceNum").textContent = d.confidence || "—";
+
+      // Probability bars
+      const probBars = document.getElementById("probBars");
+      probBars.innerHTML = "";
+      if (d.all_probabilities) {
+        for (const [em, pct] of Object.entries(d.all_probabilities)) {
+          const pNum = parseInt(pct) || 0;
+          const emColor = EMOTION_COLORS[em] || "#888";
+          probBars.innerHTML += `
+            <div class="prob-item">
+              <div class="prob-item-label">
+                <span>${em.charAt(0).toUpperCase() + em.slice(1)}</span>
+                <span style="color:${emColor};font-weight:600">${pct}</span>
+              </div>
+              <div class="prob-bar-bg">
+                <div class="prob-bar-fill" style="width:${pNum}%;background:${emColor}"></div>
+              </div>
+            </div>`;
+        }
+      }
+
+      // Wisdom card
+      const tv = d.top_verse;
+      document.getElementById("verseSource").textContent =
+        tv.source ? `${tv.source} · Ch.${tv.chapter} V.${tv.verse_num}` : "Scripture";
+      document.getElementById("verseSanskrit").textContent = tv.sanskrit || "";
+      document.getElementById("verseEnglish").innerHTML = `&ldquo;${tv.english || ""}&rdquo;`;
+      document.getElementById("verseMeaning").textContent = tv.meaning || "";
+      document.getElementById("verseRelevance").textContent = tv.relevance || "—";
+
+      // Related verses
+      const related = document.getElementById("relatedVerses");
+      related.innerHTML = "";
+      (d.related_verses || []).forEach(v => {
+        related.innerHTML += `
+          <div class="related-verse-card">
+            <div class="related-header">
+              <span class="related-source">${v.source} · Ch.${v.chapter} V.${v.verse_num}</span>
+              <span class="related-relevance">Relevance: ${v.relevance}</span>
+            </div>
+            <div class="related-english">&ldquo;${v.english}&rdquo;</div>
+            <div class="related-meaning">${v.meaning}</div>
+          </div>`;
+      });
+
+      // Guidance
+      const guidanceList = document.getElementById("guidanceList");
+      guidanceList.innerHTML = "";
+      (d.guidance || []).forEach((tip, i) => {
+        guidanceList.innerHTML += `
+          <div class="guidance-tip">
+            <div class="tip-num">${i + 1}</div>
+            <div class="tip-text">${renderMd(tip)}</div>
+          </div>`;
+      });
+    }
+
+    // ── Lightbox ─────────────────────────────────────
+    function openLightbox(name) {
+      document.getElementById("lightboxImg").src = `${API}/plot/${name}`;
+      document.getElementById("lightbox").classList.add("open");
+    }
+    function closeLightbox(e) {
+      if (!e || e.target !== document.getElementById("lightboxImg")) {
+        document.getElementById("lightbox").classList.remove("open");
+      }
+    }
+
+    // ── Keyboard ──────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+      loadModelInfo();
+      document.getElementById("userInput").addEventListener("keydown", e => {
+        if (e.key === "Enter" && e.ctrlKey) analyze();
+      });
+    });
+  </script>
+</body>
+</html>
